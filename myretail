@@ -1,0 +1,119 @@
+#!/bin/bash
+
+BASEDIR=`dirname $0`
+cd $BASEDIR
+
+function do_setup_mysql(){
+
+    sudo docker pull mysql
+    sudo docker run --name myretail-mysql -e MYSQL_ROOT_PASSWORD=myretail -d mysql:latest
+}
+
+function do_run_mysql(){
+    sudo docker exec -it myretail-mysql bash
+}
+function do_run(){
+
+    for OPT in $@; do
+        case $OPT in
+            mysql)
+                do_run_mysql
+                ;;
+        esac
+    done
+
+
+}
+function do_setup(){
+
+    for OPT in $@ ; do
+
+        echo "Setup: $OPT"
+
+        case $OPT in
+            mysql)
+                do_setup_mysql
+                ;;
+            emacs)
+                do_setup_emacs
+                ;;
+            boot)
+                do_setup_boot
+                ;;
+            kafka)
+
+                do_setup_kafka $@
+
+                ;;
+            kylin)
+                do_setup_kylin
+                ;;
+            sone)
+                do_goto_sone
+                ;;
+            saiku)
+                do_goto_saiku
+                ;;
+            push)
+                do_push
+                ;;
+            *)
+                do_help
+                ;;
+        esac
+
+    done
+
+}
+for OPT in $@ ; do
+
+    echo "Starting $OPT"
+
+    case $OPT in
+        setup)
+            shift
+            do_setup $@
+            exit 0
+            ;;
+        run)
+            shift
+            do_run $@
+            exit 0
+            ;;
+        start)
+            do_start
+            ;;
+        svnignore)
+            do_svn_ignore
+            ;;
+        wb|workbench)
+            do_start_workbench
+            ;;
+        proxy)
+            do_start_proxy
+            ;;
+        remove_company_mark)
+            remove_company_mark
+            ;;
+        reverse_company_mark)
+            reverse_company_mark
+            ;;
+        kill)
+            shift
+            do_kill_port $@
+            exit 0
+            ;;
+        uml)
+            do_start_uml_tool
+            ;;
+        with)
+            shift
+            do_with_proxy $@
+            exit 0
+            ;;
+        *)
+            do_help
+            ;;
+    esac
+
+done
